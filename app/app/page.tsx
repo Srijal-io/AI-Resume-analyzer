@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { FileUpload } from '@/components/FileUpload';
 import { ResumeDocument } from '@/components/ResumeDocument';
 import { ProcessingState } from '@/components/ProcessingState';
+import { GapWizard } from '@/components/tailor/GapWizard';
+import { PrepareResponseType, AnswerType, MetricAnswerType } from '@/lib/tailor/schemas';
 import { AnalysisResponse } from '@/lib/types';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 import { ResuroxLogo } from '@/components/branding';
 import Link from 'next/link';
 
@@ -30,6 +32,13 @@ export default function WorkspacePage() {
   const [currentStageIdx, setCurrentStageIdx] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResponse | null>(null);
+
+  // Tailor Flow States
+  const [tailorData, setTailorData] = useState<PrepareResponseType | null>(null);
+  const [tailorLoading, setTailorLoading] = useState<boolean>(false);
+  const [tailorError, setTailorError] = useState<string | null>(null);
+  const [tailorAnswers, setTailorAnswers] = useState<AnswerType[] | null>(null);
+  const [tailorMetrics, setTailorMetrics] = useState<MetricAnswerType[] | null>(null);
 
   // FR-04: Purge legacy BYOK keys from localStorage/sessionStorage on mount
   useEffect(() => {
@@ -118,6 +127,44 @@ export default function WorkspacePage() {
     setJobDescription('');
     setResult(null);
     setError(null);
+    setTailorData(null);
+    setTailorError(null);
+    setTailorAnswers(null);
+    setTailorMetrics(null);
+  };
+
+  const handleStartTailoring = async () => {
+    if (!file || !jobDescription.trim()) return;
+    setTailorLoading(true);
+    setTailorError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('resumeFile', file);
+      formData.append('jdText', jobDescription);
+
+      if (result?.explanation?.areasToImprove) {
+        const improvements = result.explanation.areasToImprove.map((text: string) => ({ suggestion: text }));
+        formData.append('analyzerImprovements', JSON.stringify(improvements));
+      }
+
+      const res = await fetch('/api/tailor/prepare', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error?.message || 'Failed to prepare tailoring session.');
+      }
+
+      setTailorData(data);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unable to start resume tailoring.';
+      setTailorError(msg);
+    } finally {
+      setTailorLoading(false);
+    }
   };
 
   return (
@@ -218,15 +265,77 @@ export default function WorkspacePage() {
         ) : loading ? (
           /* Staged Processing Overlay */
           <ProcessingState currentStageIdx={currentStageIdx} stages={LOADING_STAGES} />
-        ) : result ? (
-          /* Final Manuscript View with Score Stamp & Marginalia */
-          <ResumeDocument
-            resume={result.resume}
-            scores={result.scores}
-            multiDimensionalScores={result.multiDimensionalScores}
-            requirementMatches={result.requirementMatches}
-            explanation={result.explanation}
+        ) : tailorLoading ? (
+          <div className="max-w-xl mx-auto bg-[#F7F5F0] border-2 border-[#1C1B19] p-8 text-center my-16 shadow-xl space-y-4">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#7A1F1F]" />
+            <h3 className="font-serif text-xl font-bold text-[#1C1B19]">Preparing Consent Cards</h3>
+            <p className="font-serif italic text-xs text-[#1C1B19]/70">
+              Extracting candidate structure and identifying requirement gaps. Zero hallucination guaranteed.
+            </p>
+          </div>
+        ) : tailorData && !tailorAnswers ? (
+          <GapWizard
+            questions={tailorData.questions}
+            resume={tailorData.resume}
+            onComplete={(answers, metrics) => {
+              setTailorAnswers(answers);
+              setTailorMetrics(metrics);
+            }}
+            onCancel={() => setTailorData(null)}
           />
+        ) : tailorData && tailorAnswers ? (
+          <div className="max-w-2xl mx-auto bg-[#F7F5F0] border-2 border-[#2F5233] p-8 sm:p-10 my-12 shadow-xl space-y-6">
+            <div className="flex items-center gap-3 border-b border-[#2F5233]/20 pb-4">
+              <CheckCircle2 className="w-7 h-7 text-[#2F5233]" />
+              <div>
+                <h3 className="font-serif text-2xl font-bold text-[#1C1B19]">
+                  Consent Gate Complete
+                </h3>
+                <p className="font-serif text-xs text-[#1C1B19]/70 mt-0.5">
+                  Verified {tailorAnswers.length} responses &amp; {(tailorMetrics || []).length} metric updates. Nothing will be added beyond your explicit confirmation.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2 font-mono text-xs text-[#1C1B19]/80">
+              <p className="font-bold">Next Phase (W3):</p>
+              <p>Generation, Claim Verifier verification, and Before/After Review Draft.</p>
+            </div>
+
+            <div className="flex items-center justify-between pt-4">
+              <button
+                type="button"
+                onClick={() => setTailorAnswers(null)}
+                className="font-mono text-xs font-bold uppercase border border-[#1C1B19] px-4 py-2 hover:bg-[#1C1B19] hover:text-[#F7F5F0] transition-colors"
+              >
+                ← Edit Answers
+              </button>
+              <button
+                type="button"
+                onClick={() => setTailorData(null)}
+                className="font-mono text-xs font-bold uppercase bg-[#1C1B19] text-white px-6 py-2 hover:bg-[#7A1F1F] transition-colors"
+              >
+                Back to Analysis
+              </button>
+            </div>
+          </div>
+        ) : result ? (
+          <div>
+            {tailorError && (
+              <div className="max-w-5xl mx-auto mb-6 p-4 border-l-4 border-[#8B2E2E] bg-[#8B2E2E]/10 font-mono text-xs text-[#8B2E2E]">
+                <p className="font-bold">TAILORING ERROR:</p>
+                <p className="mt-0.5">{tailorError}</p>
+              </div>
+            )}
+            <ResumeDocument
+              resume={result.resume}
+              scores={result.scores}
+              multiDimensionalScores={result.multiDimensionalScores}
+              requirementMatches={result.requirementMatches}
+              explanation={result.explanation}
+              onStartTailoring={handleStartTailoring}
+            />
+          </div>
         ) : null}
       </div>
 

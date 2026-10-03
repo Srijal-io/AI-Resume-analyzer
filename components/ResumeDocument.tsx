@@ -16,6 +16,7 @@ interface ResumeDocumentProps {
   multiDimensionalScores?: MultiDimensionalScores;
   requirementMatches?: RequirementMatch[];
   explanation: ExplanationFeedback;
+  onStartTailoring?: () => void;
 }
 
 export const ResumeDocument: React.FC<ResumeDocumentProps> = ({
@@ -24,6 +25,7 @@ export const ResumeDocument: React.FC<ResumeDocumentProps> = ({
   multiDimensionalScores,
   requirementMatches,
   explanation,
+  onStartTailoring,
 }) => {
   const matchedSkillsMap = new Set(
     scores.skillsMatrix.filter(s => s.status === 'matched').map(s => s.skill.toLowerCase())
@@ -86,6 +88,30 @@ export const ResumeDocument: React.FC<ResumeDocumentProps> = ({
           <ScoreStamp score={multiDimensionalScores?.overallEvaluation ?? scores.overallScore} label={scores.matchLabel} />
         </div>
       </div>
+
+      {/* Tailoring Action Banner */}
+      {onStartTailoring && (
+        <div className="bg-[#1C1B19] text-[#F7F5F0] p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+          <div>
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#B8860B] block mb-1">
+              ATS TAILORING AVAILABLE
+            </span>
+            <h3 className="font-serif font-bold text-lg text-white">
+              Tailor My Resume for this Role
+            </h3>
+            <p className="font-serif italic text-xs text-[#F7F5F0]/80 mt-0.5">
+              Review identified qualification gaps, confirm your real background, and produce a new ATS-optimized PDF resume. Nothing is added without your consent.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onStartTailoring}
+            className="w-full sm:w-auto shrink-0 px-6 py-3 bg-[#7A1F1F] hover:bg-[#8B2E2E] text-white font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+          >
+            Tailor My Resume →
+          </button>
+        </div>
+      )}
 
       {/* Asymmetric Manuscript Layout Grid */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">

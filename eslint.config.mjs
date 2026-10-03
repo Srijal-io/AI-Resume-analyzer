@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     "graft/**",
     "tests/**",
     "__tests__/**",
+    "apps/**",
+    "scripts/**",
   ]),
   {
     rules: {
@@ -36,7 +38,7 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    files: ["lib/ai/**", "lib/pipeline/**", "app/**"],
+    files: ["lib/ai/**", "lib/pipeline/**", "app/**", "lib/tailor/**"],
     rules: {
       "no-restricted-imports": "off",
     }

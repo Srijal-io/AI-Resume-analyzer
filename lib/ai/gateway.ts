@@ -48,7 +48,7 @@ export class MockAIFixtures {
  * Executes an AI stage against the role-specific provider fallback chain (Addendum A).
  * Enforces per-provider quotas, cooldowns, transient retries, and schema validation.
  */
-async function executeWithGateway<T>(
+export async function executeWithGateway<T>(
   prompt: string,
   schema: { parse: (val: unknown) => T },
   ctx: GatewayContext,
