@@ -1,0 +1,12 @@
+{
+  "name": "@resurox/extension",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "@types/chrome": "^0.0.268"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "resurox-job-copilot",
+  "version": "0.1.0-HF26",
+  "private": true,
+  "description": "Resurox Job Application Copilot — Hacktoberfest 2026. Built for Srijal.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace=apps/web run dev",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  },
+  "keywords": [
+    "hacktoberfest-2026",
+    "gemma",
+    "job-copilot",
+    "ats-resume",
+    "deterministic-matching"
+  ],
+  "author": "Shan Kumar",
+  "license": "MIT"
+}

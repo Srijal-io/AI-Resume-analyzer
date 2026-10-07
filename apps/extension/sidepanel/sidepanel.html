@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resurox V2 Assistant</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <div class="logo-row">
+        <img src="logo.png" alt="Resurox Logo" class="brand-logo">
+        <div class="title-wrap">
+          <h2>Resurox V2</h2>
+          <span class="badge">Precision AI</span>
+        </div>
+      </div>
+      <p class="subtitle">Capture job posts, attest skills, and generate verified tailored bullets.</p>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="tabs">
+      <button class="tab-btn active" id="tab-tailor">Tailor</button>
+      <button class="tab-btn" id="tab-profile">My Resume</button>
+      <button class="tab-btn" id="tab-settings">BYOK / Settings</button>
+    </nav>
+
+    <!-- TAB 1: TAILOR VIEW -->
+    <main id="view-tailor" class="view-content active">
+      <div class="action-card">
+        <label class="section-label">1. Job Description</label>
+        <button id="btn-capture-selection" class="btn secondary-btn">
+          📋 Capture Selected Text from Webpage
+        </button>
+        <textarea id="txt-jd" rows="5" placeholder="Or paste job description text here..."></textarea>
+      </div>
+
+      <div class="action-card">
+        <button id="btn-run-prepare" class="btn primary-btn">
+          ✨ Analyze & Prepare Matches
+        </button>
+      </div>
+
+      <!-- Confirmation Gate (Hidden initially) -->
+      <section id="gate-section" class="gate-card hidden">
+        <div class="gate-header">
+          <h3>Confirmation Gate</h3>
+          <p class="gate-sub">Attest whether you possess these required qualifications:</p>
+        </div>
+        <div id="questions-list" class="questions-list"></div>
+        <button id="btn-submit-confirmations" class="btn accent-btn">
+          🔒 Verify & Tailor Resume
+        </button>
+      </section>
+
+      <!-- Change Report & PDF Download (Hidden initially) -->
+      <section id="report-section" class="report-card hidden">
+        <div class="report-header">
+          <h3>Verified Change Report</h3>
+          <span class="status-pill green">Zero Hallucinations</span>
+        </div>
+        <div id="report-list" class="report-list"></div>
+
+        <div class="pdf-download-action mt-3">
+          <button id="btn-download-pdf" class="btn download-btn">
+            📥 Download Tailored Resume (ATS PDF)
+          </button>
+          <p class="download-sub">Single-column, machine-readable ATS format with 100% verified claims.</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- TAB 2: PROFILE VIEW -->
+    <main id="view-profile" class="view-content hidden">
+      <div class="action-card">
+        <label class="section-label">Master Resume (PDF Upload)</label>
+        <p class="field-hint">Upload your PDF resume. Text is extracted securely in browser memory and saved in local storage.</p>
+        
+        <div id="drop-zone" class="drop-zone">
+          <div class="drop-icon">📄</div>
+          <p class="drop-title">Drag & drop your PDF resume here</p>
+          <p class="drop-sub">or click to browse from your device (.pdf only)</p>
+          <input type="file" id="file-resume-pdf" accept=".pdf" class="file-input">
+        </div>
+
+        <div id="pdf-status-card" class="pdf-status-card hidden">
+          <div class="pdf-file-info">
+            <span class="file-badge">PDF</span>
+            <div class="file-details">
+              <span id="pdf-file-name" class="file-name">resume.pdf</span>
+              <span id="pdf-file-size" class="file-size">142 KB • Extracted</span>
+            </div>
+            <button id="btn-remove-pdf" class="icon-btn" title="Remove PDF">✕</button>
+          </div>
+          <div class="pdf-preview-box">
+            <label class="preview-label">Extracted Content Preview:</label>
+            <div id="pdf-extracted-snippet" class="extracted-text-preview"></div>
+          </div>
+        </div>
+
+        <button id="btn-save-profile" class="btn primary-btn mt-3" disabled>
+          💾 Save Master Resume
+        </button>
+      </div>
+    </main>
+
+    <!-- TAB 3: SETTINGS / BYOK -->
+    <main id="view-settings" class="view-content hidden">
+      <div class="action-card">
+        <label class="section-label">Server / Mode Selection</label>
+        <div class="radio-group">
+          <label>
+            <input type="radio" name="ai-mode" value="server" checked> Server Managed (Resurox Default)
+          </label>
+          <label>
+            <input type="radio" name="ai-mode" value="byok"> Bring Your Own Key (BYOK)
+          </label>
+        </div>
+      </div>
+
+      <div id="byok-settings-card" class="action-card hidden">
+        <label class="section-label">BYOK Provider & Vault</label>
+        <p class="field-hint">Your key is stored encrypted in session storage and sent directly to your provider.</p>
+        <select id="sel-provider" class="select-input">
+          <option value="openai">OpenAI Compatible (Groq / OpenRouter / OpenAI)</option>
+          <option value="gemini">Google Gemini</option>
+          <option value="anthropic">Anthropic Claude</option>
+        </select>
+        <input type="password" id="txt-api-key" placeholder="Enter API Key (sk-...)" class="text-input mt-2">
+        <input type="text" id="txt-base-url" placeholder="Custom Base URL (optional)" class="text-input mt-2">
+        <div class="btn-row mt-2">
+          <button id="btn-save-key" class="btn secondary-btn">Save Key</button>
+          <button id="btn-forget-key" class="btn danger-btn">Forget Key</button>
+        </div>
+      </div>
+
+      <div class="privacy-notice">
+        <h4>🔒 Privacy Guarantee</h4>
+        <p>Your resume text is processed in memory during the active session. Ephemeral session tokens expire in 30 minutes.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="jspdf.umd.min.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
