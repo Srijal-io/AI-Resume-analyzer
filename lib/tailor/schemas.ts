@@ -109,6 +109,48 @@ export const PrepareResponseSchema = z.object({
   questions: z.array(Question),
 });
 
+export const BulletChange = z.object({
+  id: z.string(),
+  section: z.enum(["experience", "projects", "achievements", "other"]),
+  parentTitle: z.string(),
+  original: z.string(),
+  rewritten: z.string(),
+  provenance: Provenance,
+  reason: z.string(),
+  status: z.enum(["APPROVED_BY_VERIFIER", "UNCHANGED_FALLBACK"]),
+  reasons: z.array(z.string()).optional(),
+});
+
+export const AddedSkill = z.object({
+  category: z.string(),
+  name: z.string(),
+  provenance: Provenance,
+  context: z.string().optional(),
+});
+
+export const ChangeReport = z.object({
+  summary: z.string(),
+  changes: z.array(BulletChange),
+  addedSkills: z.array(AddedSkill),
+  unchangedBulletsCount: z.number(),
+  totalBulletsCount: z.number(),
+  provenanceBreakdown: z.record(z.string(), z.number()),
+  zeroHallucinationVerified: z.boolean(),
+});
+
+export const TailorGenerateRequestSchema = z.object({
+  resume: CanonicalResume,
+  requirements: z.array(Requirement),
+  answers: z.array(Answer),
+  metrics: z.array(MetricAnswer).optional().default([]),
+  targetJobTitle: z.string().optional(),
+});
+
+export const TailorGenerateResponseSchema = z.object({
+  tailoredResume: CanonicalResume,
+  changeReport: ChangeReport,
+});
+
 export type BulletType = z.infer<typeof Bullet>;
 export type CanonicalResumeType = z.infer<typeof CanonicalResume>;
 export type RequirementType = z.infer<typeof Requirement>;
@@ -117,6 +159,11 @@ export type MetricAnswerType = z.infer<typeof MetricAnswer>;
 export type ProvenanceType = z.infer<typeof Provenance>;
 export type QuestionType = z.infer<typeof Question>;
 export type PrepareResponseType = z.infer<typeof PrepareResponseSchema>;
+export type BulletChangeType = z.infer<typeof BulletChange>;
+export type AddedSkillType = z.infer<typeof AddedSkill>;
+export type ChangeReportType = z.infer<typeof ChangeReport>;
+export type TailorGenerateRequestType = z.infer<typeof TailorGenerateRequestSchema>;
+export type TailorGenerateResponseType = z.infer<typeof TailorGenerateResponseSchema>;
 
 /**
  * Assigns stable, deterministic IDs across CanonicalResume hierarchy.

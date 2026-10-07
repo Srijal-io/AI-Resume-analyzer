@@ -119,9 +119,9 @@ export function findTerms(text: string): string[] {
   const lower = text.toLowerCase();
 
   for (const [alias, canonical] of ALIAS_LOOKUP.entries()) {
-    // Word boundary matching accounting for special characters like C++, C#, .NET
+    // Word boundary matching accounting for special characters like C++, C#, .NET, and sentence-ending periods
     const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`(?:^|[\\s,;()/\\[\\]:])${escaped}(?=[\\s,;()/\\[\\]:]|$)`, 'i');
+    const regex = new RegExp(`(?:^|[\\s,;()/\\[\\]:!?-])${escaped}(?=[\\s,;()/\\[\\]:!?-]|\\.(?:[\\s,;()/\\[\\]:!?-]|$)|$)`, 'i');
     if (regex.test(lower)) {
       found.add(canonical);
     }

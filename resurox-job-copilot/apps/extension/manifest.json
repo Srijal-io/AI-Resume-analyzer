@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Resurox Job Application Copilot",
+  "version": "0.1.0",
+  "description": "ATS match analysis and tailored resumes grounded strictly in verified evidence. Built for Srijal.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Analyze with Resurox"
+  },
+  "background": {
+    "service_worker": "dist/background.js"
+  }
+}

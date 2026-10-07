@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Resurox Job Copilot</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 360px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0a0f18;
+      color: #f1f5f9;
+      padding: 16px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 8px;
+    }
+    .logo {
+      font-weight: 800;
+      font-size: 1rem;
+      color: #10b981;
+    }
+    .badge {
+      background: rgba(16,185,129,0.15);
+      color: #34d399;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    input, textarea {
+      width: 100%;
+      background: #0d1522;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      padding: 6px 8px;
+      color: #f8fafc;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+    button {
+      width: 100%;
+      background: #10b981;
+      color: #022c22;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    button:hover { background: #059669; }
+    .secondary-btn {
+      background: rgba(255,255,255,0.06);
+      color: #f1f5f9;
+      border: 1px solid rgba(255,255,255,0.15);
+      margin-top: 6px;
+    }
+    .score-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 3px solid #10b981;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.3rem;
+      margin: 8px auto;
+      background: rgba(16,185,129,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">Resurox Copilot</div>
+    <div class="badge">Srijal (3rd Yr CS)</div>
+  </div>
+
+  <div class="card">
+    <label>Capture Active Job Tab</label>
+    <button id="extractTabBtn">Extract from Current Page</button>
+  </div>
+
+  <div class="card">
+    <label>Or Manual Add / Paste JD</label>
+    <input type="text" id="jobTitle" placeholder="Role (e.g. Full Stack Intern)" value="Full Stack Developer">
+    <input type="text" id="company" placeholder="Company (e.g. Acme)" value="TechCorp">
+    <textarea id="rawJd" rows="4" placeholder="Paste JD requirements here..."></textarea>
+    <button id="analyzeBtn">Analyze Match & Gaps</button>
+  </div>
+
+  <div id="resultCard" class="card" style="display: none; text-align: center;">
+    <div class="score-circle" id="scoreDisplay">0%</div>
+    <div id="statusText" style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px;">Analysis Complete</div>
+    <div id="strengthsDisplay" style="font-size: 0.75rem; color: #34d399; text-align: left; margin-bottom: 4px;"></div>
+    <div id="gapsDisplay" style="font-size: 0.75rem; color: #fb7185; text-align: left; margin-bottom: 8px;"></div>
+    <button id="openWebBtn" class="secondary-btn">Open Full App & Confirm Gaps →</button>
+  </div>
+
+  <script src="dist/popup.js"></script>
+</body>
+</html>
