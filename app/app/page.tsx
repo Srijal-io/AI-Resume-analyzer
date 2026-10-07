@@ -5,9 +5,15 @@ import { FileUpload } from '@/components/FileUpload';
 import { ResumeDocument } from '@/components/ResumeDocument';
 import { ProcessingState } from '@/components/ProcessingState';
 import { GapWizard } from '@/components/tailor/GapWizard';
-import { PrepareResponseType, AnswerType, MetricAnswerType } from '@/lib/tailor/schemas';
+import { TailorReviewDraft } from '@/components/tailor/TailorReviewDraft';
+import {
+  PrepareResponseType,
+  AnswerType,
+  MetricAnswerType,
+  TailorGenerateResponseType,
+} from '@/lib/tailor/schemas';
 import { AnalysisResponse } from '@/lib/types';
-import { ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { ResuroxLogo } from '@/components/branding';
 import Link from 'next/link';
 
@@ -39,6 +45,8 @@ export default function WorkspacePage() {
   const [tailorError, setTailorError] = useState<string | null>(null);
   const [tailorAnswers, setTailorAnswers] = useState<AnswerType[] | null>(null);
   const [tailorMetrics, setTailorMetrics] = useState<MetricAnswerType[] | null>(null);
+  const [tailorGenerated, setTailorGenerated] = useState<TailorGenerateResponseType | null>(null);
+  const [generatingTailor, setGeneratingTailor] = useState<boolean>(false);
 
   // FR-04: Purge legacy BYOK keys from localStorage/sessionStorage on mount
   useEffect(() => {
@@ -131,6 +139,40 @@ export default function WorkspacePage() {
     setTailorError(null);
     setTailorAnswers(null);
     setTailorMetrics(null);
+    setTailorGenerated(null);
+    setGeneratingTailor(false);
+  };
+
+  const handleGenerateTailoredResume = async (answers: AnswerType[], metrics: MetricAnswerType[]) => {
+    if (!tailorData) return;
+    setGeneratingTailor(true);
+    setTailorError(null);
+
+    try {
+      const res = await fetch('/api/tailor/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          resume: tailorData.resume,
+          requirements: tailorData.requirements,
+          answers,
+          metrics,
+          targetJobTitle: result?.explanation?.executiveSummary || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error?.message || 'Failed to generate tailored resume.');
+      }
+
+      setTailorGenerated(data);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error during resume tailoring generation.';
+      setTailorError(msg);
+    } finally {
+      setGeneratingTailor(false);
+    }
   };
 
   const handleStartTailoring = async () => {
@@ -273,6 +315,29 @@ export default function WorkspacePage() {
               Extracting candidate structure and identifying requirement gaps. Zero hallucination guaranteed.
             </p>
           </div>
+        ) : generatingTailor ? (
+          <div className="max-w-xl mx-auto bg-[#F7F5F0] border-2 border-[#1C1B19] p-8 text-center my-16 shadow-xl space-y-4">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#2F5233]" />
+            <h3 className="font-serif text-xl font-bold text-[#1C1B19]">Synthesizing Tailored Draft</h3>
+            <p className="font-serif italic text-xs text-[#1C1B19]/70">
+              Applying deterministic Claim Verifier checks. Guaranteeing 0% fabricated tools, metrics, or credentials.
+            </p>
+          </div>
+        ) : tailorGenerated ? (
+          <TailorReviewDraft
+            tailoredResume={tailorGenerated.tailoredResume}
+            changeReport={tailorGenerated.changeReport}
+            onBackToAnswers={() => {
+              setTailorGenerated(null);
+              setTailorAnswers(null);
+            }}
+            onReset={() => {
+              setTailorData(null);
+              setTailorGenerated(null);
+              setTailorAnswers(null);
+              setTailorMetrics(null);
+            }}
+          />
         ) : tailorData && !tailorAnswers ? (
           <GapWizard
             questions={tailorData.questions}
@@ -280,45 +345,10 @@ export default function WorkspacePage() {
             onComplete={(answers, metrics) => {
               setTailorAnswers(answers);
               setTailorMetrics(metrics);
+              handleGenerateTailoredResume(answers, metrics);
             }}
             onCancel={() => setTailorData(null)}
           />
-        ) : tailorData && tailorAnswers ? (
-          <div className="max-w-2xl mx-auto bg-[#F7F5F0] border-2 border-[#2F5233] p-8 sm:p-10 my-12 shadow-xl space-y-6">
-            <div className="flex items-center gap-3 border-b border-[#2F5233]/20 pb-4">
-              <CheckCircle2 className="w-7 h-7 text-[#2F5233]" />
-              <div>
-                <h3 className="font-serif text-2xl font-bold text-[#1C1B19]">
-                  Consent Gate Complete
-                </h3>
-                <p className="font-serif text-xs text-[#1C1B19]/70 mt-0.5">
-                  Verified {tailorAnswers.length} responses &amp; {(tailorMetrics || []).length} metric updates. Nothing will be added beyond your explicit confirmation.
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-2 font-mono text-xs text-[#1C1B19]/80">
-              <p className="font-bold">Next Phase (W3):</p>
-              <p>Generation, Claim Verifier verification, and Before/After Review Draft.</p>
-            </div>
-
-            <div className="flex items-center justify-between pt-4">
-              <button
-                type="button"
-                onClick={() => setTailorAnswers(null)}
-                className="font-mono text-xs font-bold uppercase border border-[#1C1B19] px-4 py-2 hover:bg-[#1C1B19] hover:text-[#F7F5F0] transition-colors"
-              >
-                ← Edit Answers
-              </button>
-              <button
-                type="button"
-                onClick={() => setTailorData(null)}
-                className="font-mono text-xs font-bold uppercase bg-[#1C1B19] text-white px-6 py-2 hover:bg-[#7A1F1F] transition-colors"
-              >
-                Back to Analysis
-              </button>
-            </div>
-          </div>
         ) : result ? (
           <div>
             {tailorError && (
