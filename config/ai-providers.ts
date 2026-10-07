@@ -90,22 +90,48 @@ export const DEFAULT_PROVIDER_REGISTRY: Record<string, ProviderRegistryEntry> = 
     baseUrl: 'https://api.groq.com/openai/v1',
     apiKeyEnv: 'GROQ_API_KEY',
     models: {
-      resume: 'qwen/qwen3.8-27b',
-      job: 'qwen/qwen3.8-27b',
-      explain: 'qwen/qwen3.8-27b',
+      resume: 'llama-3.1-8b-instant',
+      job: 'llama-3.1-8b-instant',
+      explain: 'llama-3.1-8b-instant',
     },
     free: true,
-    acceptsPersonalData: true, // TODO_OWNER: Read terms and set true if personal data permitted
+    acceptsPersonalData: true,
     reasoning: false,
     limits: {
-      rpm: 30, // TODO_OWNER: Verify exact RPM/RPD/TPM from Groq Cloud Console
-      rpd: 14400, // TODO_OWNER: Verify exact RPD
+      rpm: 30,
+      rpd: 14400,
+      tpm: 20000,
     },
     price: { inputPer1M: 0, outputPer1M: 0 },
     supportsJsonMode: true,
     maxOutputTokens: 4000,
-    notes: 'Groq Cloud Free Tier. Check console.groq.com for active models & limits.',
-    hasPlaceholder: false, // Set to false once model ID and rate limits are verified
+    notes: 'Groq Cloud Free Tier (Llama 3.1 8B Instant with 20k TPM limit).',
+    hasPlaceholder: false,
+  },
+
+  // 3. Google Gemini Free Tier Entry
+  'gemini-free': {
+    id: 'gemini-free',
+    type: 'gemini',
+    baseUrl: 'https://generativelanguage.googleapis.com',
+    apiKeyEnv: 'GEMINI_API_KEY',
+    models: {
+      resume: 'gemini-1.5-flash',
+      job: 'gemini-1.5-flash',
+      explain: 'gemini-1.5-flash',
+    },
+    free: true,
+    acceptsPersonalData: true,
+    reasoning: false,
+    limits: {
+      rpm: 15,
+      rpd: 1500,
+    },
+    price: { inputPer1M: 0, outputPer1M: 0 },
+    supportsJsonMode: true,
+    maxOutputTokens: 4000,
+    notes: 'Google Gemini 1.5 Flash Free Tier.',
+    hasPlaceholder: false,
   },
 
   /*

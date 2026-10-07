@@ -18,6 +18,7 @@ const eslintConfig = defineConfig([
     "__tests__/**",
     "apps/**",
     "scripts/**",
+    "resurox-job-copilot/**",
   ]),
   {
     rules: {
